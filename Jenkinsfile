@@ -103,7 +103,7 @@ pipeline {
         stage('EKS Deploy') {
             steps {
                 sh '''
-                    aws eks update-kubeconfig --name webappanand-kube --region us-east-1
+                    aws eks update-kubeconfig --name webappkarthi --region us-east-1
                     sed "s/buildNumber/${BUILD_NUMBER}/g" deploy.yml > deploy-new.yml
                     kubectl apply -f deploy-new.yml
                     kubectl apply -f svc.yml
