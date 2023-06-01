@@ -118,7 +118,7 @@ pipeline {
                 // Send email report
                 emailext body: "Pipeline execution status: ${currentBuild.result}",
                          subject: "Pipeline Report - ${currentBuild.result}",
-                         to: 'asoorisetty@gmail.com'
+                         to: 'karthikeyinidandu@gmail.com'
             }
         }
     }
