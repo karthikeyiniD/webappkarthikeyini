@@ -93,8 +93,8 @@ pipeline {
 
         stage('Docker Login and Push Image to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'Docker_Hub_PWD', variable: 'Docker_Hub_PWD')]) {
-                    sh "docker login -u karthikeyinid -p ${Docker_Hub_PWD}"
+                withCredentials([string(credentialsId: 'DOCKER', variable: 'DOCKER')]) {
+                    sh "docker login -u karthikeyinid -p ${DOCKER}"
                 }
                 sh "docker push karthikeyinid/webappkarthi:KARTHI-PROJECT-${BUILD_NUMBER}"
             }
