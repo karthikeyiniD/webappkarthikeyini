@@ -2,11 +2,13 @@ pipeline {
     agent any
 
     stages {
+        /*
         stage('Cleanup WorkSpace') {
             steps {
                 cleanWs()
             }
         }
+        */
 
         stage('Checkout from SCM') {
             steps {
@@ -14,6 +16,7 @@ pipeline {
             }
         }
 
+      /*
         stage('Installing Angular dependencies') {
             steps {
                 script {
@@ -29,6 +32,7 @@ pipeline {
                 }
             }
         }
+        
 
         stage('Code Analysis') {
             steps {
@@ -38,6 +42,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Build') {
             steps {
@@ -48,6 +53,7 @@ pipeline {
             }
         }
 
+      /*
         stage('Unit Testing') {
             steps {
                 script {
@@ -59,6 +65,7 @@ pipeline {
                 }
             }
         }
+        
 
         stage('Package Artifacts') {
             steps {
@@ -68,6 +75,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Build Docker Image') {
             steps {
@@ -92,11 +100,12 @@ pipeline {
         */
 
         stage('Docker Login and Push Image to Docker Hub') {
-            when {
+           /* when {
                 expression {
                     currentBuild.resultIsBetterOrEqualTo('SUCCESS') // Only execute if the build result is SUCCESS
                 }
             }
+            */
             steps {
                 withCredentials([string(credentialsId: 'DOCKER', variable: 'DOCKER')]) {
                     sh "docker login -u karthikeyinid -p ${DOCKER}"
@@ -104,6 +113,7 @@ pipeline {
                 sh "docker push karthikeyinid/webappkarthi:KARTHI-PROJECT-${BUILD_NUMBER}"
             }
         }
+      /*
 
         stage('EKS Deploy') {
             steps {
@@ -115,9 +125,10 @@ pipeline {
                 '''
             }
         }
+        */
 
         // Uncomment the following stage if you want to include ECS Deploy
-        /*
+        
         stage('ECS Deploy') {
             steps {
                 sh '''
@@ -127,9 +138,10 @@ pipeline {
                 '''
             }
         }
-        */
+        
     }
 
+  /*
     post {
         always {
             script {
@@ -140,4 +152,5 @@ pipeline {
             }
         }
     }
+    */
 }
