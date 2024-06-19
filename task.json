@@ -2,7 +2,7 @@
     "containerDefinitions": [ 
         { 
             "essential": true,
-            "image": "docker build -t karthikeyinid/webappkarthi:KARTHI-PROJECT-buildNumber",
+            "image": "karthikeyinid/webappkarthi:KARTHI-PROJECT-buildNumber",
             "logConfiguration": { 
                 "logDriver": "awslogs",
                 "options": { 
