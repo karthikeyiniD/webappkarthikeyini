@@ -30,6 +30,15 @@ pipeline {
             }
         }
 
+        stage('Code Analysis') {
+            steps {
+                script {
+                    // Perform code analysis using SonarQube
+                    sh './sonar_analysis.sh'
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 script {
@@ -47,17 +56,6 @@ pipeline {
 
                     // Run unit tests
                     sh 'npm run test -- --browsers ChromeHeadlessNoSandbox'
-                }
-            }
-        }
-
-        stage('Code Analysis') {
-            steps {
-                script {
-                    // Perform code analysis using SonarQube
-                    def sonarScanner = 'node_modules/sonar-scanner/bin/sonar-scanner'
-                    sh "${sonarScanner}"
-                    sh 'npm run sonar'
                 }
             }
         }
@@ -80,18 +78,25 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis after Docker Build') {
+        // Uncomment the following stage if you want to include Image Scan
+        /*
+        stage('Image Scan') {
             steps {
-                script {
-                    // Perform SonarQube analysis after Docker image is built
-                    def sonarScanner = 'node_modules/sonar-scanner/bin/sonar-scanner'
-                    sh "${sonarScanner}"
-                    sh 'npm run sonar'
-                }
+                sh '''
+                    sed "s/buildNumber/$1/g" image_scan.sh > image_scan-new.sh
+                    chmod +x image_scan-new.sh
+                    bash image_scan-new.sh
+                '''
             }
         }
+        */
 
         stage('Docker Login and Push Image to Docker Hub') {
+            when {
+                expression {
+                    currentBuild.resultIsBetterOrEqualTo('SUCCESS') // Only execute if the build result is SUCCESS
+                }
+            }
             steps {
                 withCredentials([string(credentialsId: 'DOCKER', variable: 'DOCKER')]) {
                     sh "docker login -u karthikeyinid -p ${DOCKER}"
@@ -110,6 +115,19 @@ pipeline {
                 '''
             }
         }
+
+        // Uncomment the following stage if you want to include ECS Deploy
+        /*
+        stage('ECS Deploy') {
+            steps {
+                sh '''
+                    chmod +x changebuildnumber.sh
+                    ./changebuildnumber.sh $BUILD_NUMBER
+                    sh -x ecs-auto.sh
+                '''
+            }
+        }
+        */
     }
 
     post {
