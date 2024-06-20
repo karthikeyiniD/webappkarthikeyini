@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_CLI_PATH = 'C:\\Program Files\\Amazon\\AWSCLIV2\\'
+        PATH = "${AWS_CLI_PATH};${env.PATH}"
+        AWS_REGION = 'us-east-1'  
+    }
+
+    stages {
+        stage('Checkout from SCM') {
+            steps {
+                git url: 'https://github.com/anandasaisoorisetty/webappanand.git', branch: 'main'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image
+                    powershell "docker build -t anandasaisoorisetty/webappanand:ANAND-PROJECT-${env.BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Docker Login and Push Image to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'Docker_Hub_PWD', variable: 'Docker_Hub_PWD')]) {
+                    powershell "docker login -u anandasaisoorisetty -p ${env.Docker_Hub_PWD}"
+                }
+                powershell "docker push anandasaisoorisetty/webappanand:ANAND-PROJECT-${env.BUILD_NUMBER}"
+            }
+        }
+
+        stage('Create CloudWatch Log Group') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'AWS'
+                ]]) {
+                    script {
+                        // Ensure AWS CLI is in PATH
+                        env.PATH = "${env.AWS_CLI_PATH};${env.PATH}"
+
+                        // Create CloudWatch log group
+                        powershell """
+                            \$logGroupName = '/ecs/demo'
+                            \$logGroupExists = aws logs describe-log-groups --log-group-name-prefix \$logGroupName --query "logGroups[?logGroupName=='\$logGroupName'].logGroupName" --output text --region ${env.AWS_REGION}
+                            if (-not \$logGroupExists) {
+                                Write-Output 'Creating CloudWatch log group: \$logGroupName'
+                                aws logs create-log-group --log-group-name \$logGroupName --region ${env.AWS_REGION}
+                            } else {
+                                Write-Output 'CloudWatch log group \$logGroupName already exists'
+                            }
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('ECS Deploy') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'AWS'
+                ]]) {
+                    script {
+                        // Execute deployment scripts with AWS CLI
+                        powershell """
+                            .\\changebuildnumber.ps1 -buildNumber \$env:BUILD_NUMBER
+                            .\\ecs-auto.ps1
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
