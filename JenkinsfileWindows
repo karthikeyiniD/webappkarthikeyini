@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout from SCM') {
             steps {
-                git url: 'https://github.com/anandasaisoorisetty/webappanand.git', branch: 'main'
+                git url: 'https://github.com/karthikeyiniD/webappkarthikeyini.git', branch: 'main'
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image
-                    powershell "docker build -t anandasaisoorisetty/webappanand:ANAND-PROJECT-${env.BUILD_NUMBER} ."
+                    powershell "docker build -t karthikeyinid/webappkarthi:KARTHI-PROJECT-${env.BUILD_NUMBER} ."
                 }
             }
         }
@@ -26,9 +26,9 @@ pipeline {
         stage('Docker Login and Push Image to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'Docker_Hub_PWD', variable: 'Docker_Hub_PWD')]) {
-                    powershell "docker login -u anandasaisoorisetty -p ${env.Docker_Hub_PWD}"
+                    powershell "docker login -u karthikeyinid -p ${env.Docker_Hub_PWD}"
                 }
-                powershell "docker push anandasaisoorisetty/webappanand:ANAND-PROJECT-${env.BUILD_NUMBER}"
+                powershell "docker push karthikeyinid/webappkarthi:KARTHI-PROJECT-${env.BUILD_NUMBER}"
             }
         }
 
